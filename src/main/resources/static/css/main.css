@@ -1,0 +1,19 @@
+p.error {
+    font-weight: bold;
+    color: red;
+}
+
+div.logout {
+    margin-right: 2em;;
+}
+
+.box {
+    border: 4px solid #28a745;
+    border-radius: 5px;
+    box-shadow:
+            1px 1px 1px 1px #30363d
+}
+
+body {
+    background-color: black;
+}

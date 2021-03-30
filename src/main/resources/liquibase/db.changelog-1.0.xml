@@ -1,0 +1,126 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+
+    <changeSet id="1.0.0" author="vasiliy.gasevskiy">
+        <createTable tableName="category">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="req_name" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="deleted" type="BOOLEAN" defaultValue="FALSE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="1.0.1" author="vasiliy.gasevskiy">
+        <createTable tableName="banner">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="price" type="DECIMAL(8,2)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="category_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted" type="BOOLEAN" defaultValue="FALSE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="1.0.2" author="vasiliy.gasevskiy">
+        <createTable tableName="request">
+            <column name="id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="banner_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_agent" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ip_address" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="TIMESTAMP" defaultValue="NOW()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+
+        <!---->
+    <changeSet id="1.0.3" author="vasiliy.gasevskiy">
+        <createTable tableName="request_banner">
+            <column name="request_id" type="INT"/>
+            <!---->
+            <column name="banner_id" type="INT"/>
+        </createTable>
+    </changeSet>
+    <!---->
+    <changeSet id="1.0.4" author="vasiliy.gasevskiy">
+        <createTable tableName="banner_category">
+            <column name="banner_id" type="INT"/>
+            <!---->
+            <column name="category_id" type="INT"/>
+        </createTable>
+    </changeSet>
+    <!---->
+    <changeSet id="1.0.5" author="vasiliy.gasevskiy">
+        <addForeignKeyConstraint baseColumnNames="request_id"
+                                 baseTableName="request_banner"
+                                 constraintName="fk_request_banner_request"
+                                 onDelete="RESTRICT"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="request"/>
+    </changeSet>
+    <!---->
+    <changeSet id="1.0.6" author="vasiliy.gasevskiy">
+        <addForeignKeyConstraint baseColumnNames="banner_id"
+                                 baseTableName="request_banner"
+                                 constraintName="fk_request_banner_banner"
+                                 onDelete="RESTRICT"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="banner"/>
+    </changeSet>
+    <!---->
+    <changeSet id="1.0.7" author="vasiliy.gasevskiy">
+        <addForeignKeyConstraint baseColumnNames="category_id"
+                                 baseTableName="banner_category"
+                                 constraintName="fk_banner_category_category"
+                                 onDelete="RESTRICT"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="category"/>
+    </changeSet>
+    <!---->
+    <changeSet id="1.0.8" author="vasiliy.gasevskiy">
+        <addForeignKeyConstraint baseColumnNames="banner_id"
+                                 baseTableName="banner_category"
+                                 constraintName="fk_banner_category_banner"
+                                 onDelete="RESTRICT"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="banner"/>
+    </changeSet>
+
+
+</databaseChangeLog>

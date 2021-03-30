@@ -1,0 +1,38 @@
+-- DROP TABLE banner;
+-- DROP TABLE category;
+-- DROP TABLE request;
+--
+-- CREATE TABLE IF NOT EXISTS category
+-- (
+--     id       serial primary key,
+--     name     varchar(255) not null unique,
+--     req_name varchar(255) not null unique,
+--     deleted  boolean      not null default false
+-- );
+--
+-- CREATE TABLE IF NOT EXISTS banner
+-- (
+--     id          serial primary key,
+--     name        varchar(255)  not null unique,
+--     price       decimal(8, 2) not null,
+--     category_id int           not null,
+--     content     text          not null,
+--     deleted     boolean       not null default false,
+--     foreign key (category_id) references category (id) on DELETE restrict on UPDATE cascade
+-- );
+--
+--
+-- CREATE TABLE IF NOT EXISTS request
+-- (
+--     id         serial primary key,
+--     banner_id  int          not null,
+--     user_agent text         not null,
+--     ip_address varchar(255) not null,
+--     created    timestamp    not null,
+--     title      varchar(200) not null,
+--     foreign key (banner_id) references banner (id) on DELETE restrict on UPDATE cascade
+-- );
+--
+insert into category (name, req_name, deleted) VALUES ('simple cAT', 'rq_name', FALSE);
+
+insert into banner (name, price, category_id, content, deleted) VALUES ('SIMPLE BANNER', 100, 2, 'cont', FALSE)
