@@ -3,10 +3,7 @@ package ru.gasevsky.jarsoft.dto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Data
@@ -14,6 +11,7 @@ import javax.persistence.Table;
 @NoArgsConstructor
 public class BannerDto {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
     private String name;
     private Float price;

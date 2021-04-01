@@ -1,15 +1,33 @@
 function loadFrontEndData() {
     loadFrontEndDataBanners().then(function () {
-        loadBanners()
+        loadFrontEndDataCategories().then(function () {
+            setBannersToDoc()
+        })
     })
 
-    loadFrontEndDataCategories().then(function () {
-        loadCategories()
-    })
+
+}
+
+function setBannersToDoc() {
+    showBanners.val(true)
+    showBanners.addClass('active')
+    showCategories.val(false)
+    showCategories.removeClass('active')
+
+    fillFormsForBanners()
+}
+
+function setCategoriesToDoc() {
+    showCategories.val(true)
+    showCategories.addClass('active')
+    showBanners.val(false)
+    showBanners.removeClass('active')
+
+    fillFormsForCategories()
 }
 
 function loadFrontEndDataBanners() {
-   return  $.get({
+    return $.get({
         url: location.origin + '/banner/',
     }).done(function (listBanner) {
         frontendDataBanners = new Map()
@@ -24,7 +42,7 @@ function loadFrontEndDataBanners() {
 }
 
 function loadFrontEndDataCategories() {
-   return  $.get({
+    return $.get({
         url: location.origin + '/category/',
     }).done(function (listCat) {
         frontendDataCategories = new Map()
@@ -37,34 +55,3 @@ function loadFrontEndDataCategories() {
     });
 }
 
-function loadBanners() {
-    let banners = ''
-    for (let i = 1; i <= frontendDataBanners.size; i++) {
-        let banner = frontendDataBanners.get(i)
-        banners += '<button class="btn btn-dark btn-outline-success text text-white m-1"  value="' + banner['id'] + '" onclick="applyBannerToForm(this.value)">' + banner['name'] + '</button>'
-    }
-    $('#bannerB').html(banners)
-}
-
-function loadCategories() {
-    let categories = ''
-    for (let i = 1; i <= frontendDataCategories.size; i++) {
-        let category = frontendDataCategories.get(i)
-        categories += '<option id = "cat' + category['id'] + '" value="' + category['id'] + '">' + category['name'] + '</option>\n'
-    }
-    $('#bCategory').html(categories)
-}
-
-function applyBannerToForm(id) {
-    id = parseInt(id)
-    let banner = frontendDataBanners.get(id)
-    $('#bId').val(banner['id'])
-    $('#bName').val(banner['name'])
-    $('#bPrice').val(banner['price'])
-    let cId = "cat"+parseInt(banner['category'])
-    document.getElementById(cId).selected=true;
-    $('#bContent').val(banner['content'])
-    $('#rAction').text("Edit Banner: #" +banner["id"])
-    globalAction = 'editBanner'
-
-}

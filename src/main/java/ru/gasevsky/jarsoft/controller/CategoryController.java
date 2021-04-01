@@ -1,29 +1,41 @@
 package ru.gasevsky.jarsoft.controller;
 
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import ru.gasevsky.jarsoft.model.Category;
-import ru.gasevsky.jarsoft.repo.CategoryRepo;
+import ru.gasevsky.jarsoft.service.ApplicationService;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @RestController
 @RequestMapping("category")
 @AllArgsConstructor
-@Slf4j
 public class CategoryController {
-    private CategoryRepo categoryRepo;
-
+    private final ApplicationService service;
 
     @GetMapping("/")
-    public List<Category> findAll(){
-        return StreamSupport.stream(
-                this.categoryRepo.findAllByDeletedFalse().spliterator(), false
-        ).collect(Collectors.toList());
+    public List<Category> findAll() {
+        return service.findAllActiveCategories();
+    }
+
+    @GetMapping("/search/{name}")
+    public List<Category> findByName(@PathVariable String name) {
+        return service.findCategoriesByNameContains(name);
+    }
+
+    @PostMapping("/")
+    public ResponseEntity<Category> create(@RequestBody Category category) {
+        return service.create(category);
+    }
+
+    @PutMapping("/")
+    public ResponseEntity<Void> update(@RequestBody Category category) {
+        return service.update(category);
+    }
+
+    @DeleteMapping("/{id}")
+    public List<Integer> delete(@PathVariable int id) {
+        return service.deleteCategory(id);
     }
 }

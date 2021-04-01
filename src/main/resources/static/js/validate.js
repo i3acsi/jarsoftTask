@@ -1,14 +1,3 @@
-function getJsonOfFormdata() {
-    let id = chkId($('#bId').val())
-    let name = $('#bName').val()
-    let price = $('#bPrice').val()
-    let category = $('#bCategory option:selected').val()
-    let content = $('#bContent').val()
-    let json = JSON.stringify({'id': id, 'name': name, 'price': price, 'category' : category, 'content': content})
-    if (chkName(name)&&chkPrice(price)&&chkContent(content))
-        return json
-}
-
 function chkId(value) {
     if (value) {
         return value
@@ -17,6 +6,23 @@ function chkId(value) {
     }
 }
 
+function chkCategoryName(value) {
+    if (value.length > 3) {
+        return true
+    } else {
+        errorT("Имя должно быть длиннее 3 символов")
+        return false
+    }
+}
+
+function chkCategoryReq(value) {
+    if (value.length > 3) {
+        return true
+    } else {
+        errorT("Request ID должно быть длиннее 3 символов")
+        return false
+    }
+}
 
 function chkName(value) {
     if (value.length > 3 && /[A-zА-яЁё]/.test(value)) {
