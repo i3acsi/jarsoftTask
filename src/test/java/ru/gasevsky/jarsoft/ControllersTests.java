@@ -4,30 +4,46 @@ package ru.gasevsky.jarsoft;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
+import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.extern.slf4j.Slf4j;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import ru.gasevsky.jarsoft.model.Category;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.core.StringContains.containsString;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @Slf4j
 public class ControllersTests extends ApplicationTest {
     private ObjectMapper objectMapper;
+    private final String catUrl = "/category/";
+    private final List<Category> categories;
+
+    {
+        Category cat1 = new Category();
+        cat1.setId(0);
+        cat1.setName("CAT1");
+        cat1.setReqName("REQ1");
+        cat1.setDeleted(false);
+        Category cat2 = new Category();
+        cat1.setId(0);
+        cat1.setName("CAT2");
+        cat1.setReqName("REQ2");
+        cat1.setDeleted(false);
+        this.categories = List.of(cat1, cat2);
+    }
+
 
     @Autowired
     public void setModelMapper(ObjectMapper objectMapper) {
@@ -38,7 +54,7 @@ public class ControllersTests extends ApplicationTest {
     @Transactional(rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
     public void loadCategoriesWhenEmpty() throws Exception {
         try {
-            this.mockMvc.perform(get("/category/"))
+            this.mockMvc.perform(get(catUrl))
                     .andDo(mvcResult -> {
                         log.info("TEST METHOD");
                         log.info("Response status: " + mvcResult.getResponse().getStatus());
@@ -47,6 +63,31 @@ public class ControllersTests extends ApplicationTest {
                     .andDo(print())
                     .andExpect(content().contentType(APPLICATION_JSON))
                     .andExpect(jsonPath("$", hasSize(0)))
+            ;
+            throw new RuntimeException("rollback for accept method");
+        } catch (RuntimeException e) {
+            log.info(e.getMessage());
+        }
+    }
+
+    @Test
+    @Transactional(rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
+    public void loadCategoryAfterInserted() throws Exception {
+        ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
+        String requestJson = ow.writeValueAsString(categories.get(0));
+        try {
+            this.mockMvc.perform(post(catUrl)
+                    .contentType(APPLICATION_JSON).content(requestJson))
+                    .andExpect(status().isCreated())
+                    .andDo(print())
+                    .andExpect(content().contentType(APPLICATION_JSON))
+                    .andExpect(jsonPath("$", hasKey("id")))
+                    .andExpect(jsonPath("$", hasKey("name")))
+                    .andExpect(jsonPath("$.name", Matchers.is(categories.get(0).getName())))
+                    .andExpect(jsonPath("$", hasKey("reqName")))
+                    .andExpect(jsonPath("$.reqName", Matchers.is(categories.get(0).getReqName())))
+                    .andExpect(jsonPath("$", hasKey("deleted")))
+                    .andExpect(jsonPath("$.deleted", Matchers.is(categories.get(0).getDeleted())))
             ;
             throw new RuntimeException("rollback for accept method");
         } catch (RuntimeException e) {
