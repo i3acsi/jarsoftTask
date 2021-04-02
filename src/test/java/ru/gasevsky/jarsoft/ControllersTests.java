@@ -3,13 +3,12 @@ package ru.gasevsky.jarsoft;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-
-import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.extern.slf4j.Slf4j;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.gasevsky.jarsoft.model.Category;
@@ -18,7 +17,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.http.MediaType.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -27,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Slf4j
 public class ControllersTests extends ApplicationTest {
     private ObjectMapper objectMapper;
+    private ObjectWriter ow;
     private final String catUrl = "/category/";
     private final List<Category> categories;
 
@@ -37,17 +37,28 @@ public class ControllersTests extends ApplicationTest {
         cat1.setReqName("REQ1");
         cat1.setDeleted(false);
         Category cat2 = new Category();
-        cat1.setId(0);
-        cat1.setName("CAT2");
-        cat1.setReqName("REQ2");
-        cat1.setDeleted(false);
-        this.categories = List.of(cat1, cat2);
+        cat2.setId(0);
+        cat2.setName("CAT2");
+        cat2.setReqName("REQ2");
+        cat2.setDeleted(false);
+        Category cat3 = new Category();
+        cat3.setId(0);
+        cat3.setName("категория1");
+        cat3.setReqName("запрос1");
+        cat3.setDeleted(false);
+        Category cat4 = new Category();
+        cat4.setId(0);
+        cat4.setName("категория2");
+        cat4.setReqName("запрос2");
+        cat4.setDeleted(false);
+        this.categories = List.of(cat1, cat2, cat3, cat4);
     }
 
 
     @Autowired
     public void setModelMapper(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
+        this.ow = objectMapper.writer().withDefaultPrettyPrinter();
     }
 
     @Test
@@ -73,7 +84,6 @@ public class ControllersTests extends ApplicationTest {
     @Test
     @Transactional(rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
     public void loadCategoryAfterInserted() throws Exception {
-        ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
         String requestJson = ow.writeValueAsString(categories.get(0));
         try {
             this.mockMvc.perform(post(catUrl)
@@ -88,6 +98,136 @@ public class ControllersTests extends ApplicationTest {
                     .andExpect(jsonPath("$.reqName", Matchers.is(categories.get(0).getReqName())))
                     .andExpect(jsonPath("$", hasKey("deleted")))
                     .andExpect(jsonPath("$.deleted", Matchers.is(categories.get(0).getDeleted())))
+            ;
+            throw new RuntimeException("rollback for accept method");
+        } catch (RuntimeException e) {
+            log.info(e.getMessage());
+        }
+    }
+
+    @Test
+    @Transactional(rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
+    public void whenRepeatingKeysThanNotInsertedWith409Status() throws Exception {
+        String requestJson = ow.writeValueAsString(categories.get(0));
+        try {
+            this.mockMvc.perform(post(catUrl)
+                    .contentType(APPLICATION_JSON).content(requestJson))
+                    .andDo(print())
+                    .andExpect(status().isCreated())
+            ;
+            this.mockMvc.perform(post(catUrl)
+                    .contentType(APPLICATION_JSON).content(requestJson))
+                    .andDo(print())
+                    .andExpect(status().isConflict())
+                    .andExpect(content().contentType(MediaType.valueOf("text/plain;charset=UTF-8")))
+            ;
+            throw new RuntimeException("rollback for accept method");
+        } catch (RuntimeException e) {
+            log.info(e.getMessage());
+        }
+    }
+
+    @Test
+    @Transactional(rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
+    public void whenSearchCategoriesByPartOfNameThanGetEm() throws Exception {
+        try {
+            for (Category category : categories) {
+                this.mockMvc.perform(post(catUrl)
+                        .contentType(APPLICATION_JSON).content(ow.writeValueAsString(category)))
+                        .andDo(print())
+                        .andExpect(status().isCreated())
+                ;
+            }
+            this.mockMvc.perform(get(catUrl + "search/cat")
+                    .contentType(APPLICATION_JSON))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$", hasSize(2)))
+                    .andExpect(content().contentType(APPLICATION_JSON))
+            ;
+            throw new RuntimeException("rollback for accept method");
+        } catch (RuntimeException e) {
+            log.info(e.getMessage());
+        }
+    }
+
+    @Test
+    @Transactional(rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
+    public void whenUpdateCategoryThanLoadIt() throws Exception {
+        try {
+            this.mockMvc.perform(post(catUrl)
+                    .contentType(APPLICATION_JSON).content(ow.writeValueAsString(categories.get(1))));
+            String jsonBefore = ow.writeValueAsString(categories.get(0));
+            final Category[] res1 = new Category[1];
+            this.mockMvc.perform(post(catUrl)
+                    .contentType(APPLICATION_JSON).content(jsonBefore))
+                    .andDo(mvcResult -> {
+                        res1[0] = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Category.class);
+                    })
+                    .andExpect(status().isCreated())
+            ;
+            Assert.assertEquals(categories.get(0).getName(), res1[0].getName());
+            Assert.assertEquals(categories.get(0).getReqName(), res1[0].getReqName());
+            Assert.assertEquals(categories.get(0).getDeleted(), res1[0].getDeleted());
+
+            res1[0].setName("UPDATED");
+            res1[0].setReqName("REQUP");
+
+            String jsonAfter = ow.writeValueAsString(res1[0]);
+            this.mockMvc.perform(put(catUrl)
+                    .contentType(APPLICATION_JSON).content(jsonAfter))
+                    .andExpect(status().isOk())
+            ;
+            this.mockMvc.perform(get(catUrl + "search/updated")
+                    .contentType(APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$", hasSize(1)))
+                    .andExpect(content().contentType(APPLICATION_JSON))
+            ;
+            throw new RuntimeException("rollback for accept method");
+        } catch (RuntimeException e) {
+            log.info(e.getMessage());
+        }
+    }
+
+    @Test
+    @Transactional(rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
+    public void whenDeleteCategoryThanItsStatusIsDeleted() throws Exception {
+        try {
+            this.mockMvc.perform(post(catUrl)
+                    .contentType(APPLICATION_JSON).content(ow.writeValueAsString(categories.get(1))));
+            String jsonBefore = ow.writeValueAsString(categories.get(0));
+            final Category[] res1 = new Category[1];
+            this.mockMvc.perform(post(catUrl)
+                    .contentType(APPLICATION_JSON).content(jsonBefore))
+                    .andDo(mvcResult -> {
+                        res1[0] = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), Category.class);
+                    })
+                    .andExpect(status().isCreated())
+            ;
+            Assert.assertEquals(categories.get(0).getName(), res1[0].getName());
+            Assert.assertEquals(categories.get(0).getReqName(), res1[0].getReqName());
+            Assert.assertEquals(categories.get(0).getDeleted(), res1[0].getDeleted());
+
+            String url = catUrl + res1[0].getId();
+
+            this.mockMvc.perform(get(catUrl + "search/cat1")
+                    .contentType(APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$", hasSize(1)))
+                    .andExpect(content().contentType(APPLICATION_JSON))
+            ;
+
+            this.mockMvc.perform(delete(url)
+                    .contentType(APPLICATION_JSON))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+            ;
+            this.mockMvc.perform(get(catUrl + "search/cat1")
+                    .contentType(APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$", hasSize(0)))
+                    .andExpect(content().contentType(APPLICATION_JSON))
             ;
             throw new RuntimeException("rollback for accept method");
         } catch (RuntimeException e) {
