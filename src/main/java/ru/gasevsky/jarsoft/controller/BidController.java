@@ -16,9 +16,6 @@ public class BidController {
 
     @GetMapping(value = "/bid")
     public ResponseEntity<String> bannerContent(@RequestParam("category") String reqName) {
-        String r = reqName;
-        System.out.println(r);
-        ResponseEntity res = bidService.getBanner(r);
-        return res;
+        return bidService.getBanner(reqName);
     }
 }
