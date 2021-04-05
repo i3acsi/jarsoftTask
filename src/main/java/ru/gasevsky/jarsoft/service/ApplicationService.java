@@ -20,11 +20,10 @@ import java.util.stream.StreamSupport;
 public class ApplicationService {
     private final BannerDtoRepo bannerDtoRepo;
     private final CategoryRepo categoryRepo;
+//    private final BannerHbrRepo bannerHbrRepo;
 
     public List<BannerDto> findAllActiveBanners() {
-        return StreamSupport.stream(
-                this.bannerDtoRepo.findAllByDeletedFalse().spliterator(), false
-        ).collect(Collectors.toList());
+        return bannerDtoRepo.findAllByDeletedFalse();
     }
 
     public List<BannerDto> findBannersByNameContains(String partOfName) {
@@ -42,14 +41,13 @@ public class ApplicationService {
 
     public ResponseEntity<Void> update(BannerDto bannerDto) {
         bannerDto.setDeleted(false);
-        this.bannerDtoRepo.save(bannerDto);
+        this.bannerDtoRepo.update(bannerDto);
         return ResponseEntity.ok().build();
     }
 
     public ResponseEntity<Void> deleteBanner(int id) {
-        Optional<BannerDto> bannerOpt = this.bannerDtoRepo.findById(id);
-        if (bannerOpt.isPresent()) {
-            BannerDto bannerDto = bannerOpt.get();
+        BannerDto bannerDto = this.bannerDtoRepo.findById(id);
+        if (bannerDto!=null) {
             bannerDto.setDeleted(true);
             this.bannerDtoRepo.save(bannerDto);
             return ResponseEntity.ok().build();

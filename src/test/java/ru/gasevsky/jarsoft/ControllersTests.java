@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import ru.gasevsky.jarsoft.dto.BannerDto;
+import ru.gasevsky.jarsoft.model.Banner;
 import ru.gasevsky.jarsoft.model.Category;
 
 import java.util.List;
@@ -28,7 +30,10 @@ public class ControllersTests extends ApplicationTest {
     private ObjectMapper objectMapper;
     private ObjectWriter ow;
     private final String catUrl = "/category/";
+    private final String bannerUrl = "/banner/";
+
     private final List<Category> categories;
+    private final List<BannerDto> banners;
 
     {
         Category cat1 = new Category();
@@ -52,6 +57,36 @@ public class ControllersTests extends ApplicationTest {
         cat4.setReqName("запрос2");
         cat4.setDeleted(false);
         this.categories = List.of(cat1, cat2, cat3, cat4);
+
+        BannerDto banner1 = new BannerDto();
+        banner1.setId(0);
+        banner1.setName("BANNER1");
+        banner1.setCategory(cat1.getId());
+        banner1.setPrice(100.50F);
+        banner1.setContent("CONTENT1");
+        banner1.setDeleted(false);
+        BannerDto banner2 = new BannerDto();
+        banner2.setId(0);
+        banner2.setName("BANNER2");
+        banner2.setCategory(cat2.getId());
+        banner2.setPrice(200.50F);
+        banner2.setContent("CONTENT2");
+        banner2.setDeleted(false);
+        BannerDto banner3 = new BannerDto();
+        banner3.setId(0);
+        banner3.setName("BANNER3");
+        banner3.setCategory(cat1.getId());
+        banner3.setPrice(300.50F);
+        banner3.setContent("CONTENT3");
+        banner3.setDeleted(false);
+        BannerDto banner4 = new BannerDto();
+        banner4.setId(0);
+        banner4.setName("BANNER4");
+        banner4.setCategory(cat1.getId());
+        banner4.setPrice(400.50F);
+        banner4.setContent("CONTENT4");
+        banner4.setDeleted(false);
+        banners = List.of(banner1, banner2, banner3, banner4);
     }
 
 
@@ -59,6 +94,74 @@ public class ControllersTests extends ApplicationTest {
     public void setModelMapper(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         this.ow = objectMapper.writer().withDefaultPrettyPrinter();
+    }
+
+    @Test
+    @Transactional(rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
+    public void loadBannersWhenEmpty() throws Exception {
+        try {
+            this.mockMvc.perform(get(bannerUrl))
+                    .andDo(mvcResult -> {
+                        log.info("TEST METHOD");
+                        log.info("Response status: " + mvcResult.getResponse().getStatus());
+                        Assert.assertEquals(200, mvcResult.getResponse().getStatus());
+                    })
+                    .andDo(print())
+                    .andExpect(content().contentType(APPLICATION_JSON))
+                    .andExpect(jsonPath("$", hasSize(0)))
+            ;
+            throw new RuntimeException("rollback for accept method");
+        } catch (RuntimeException e) {
+            log.info(e.getMessage());
+        }
+    }
+
+    @Test
+    @Transactional()
+    public void loadBannerAfterInserted() throws Exception {
+        String requestJson = ow.writeValueAsString(banners.get(0));
+        try {
+            this.mockMvc.perform(post(bannerUrl)
+                    .contentType(APPLICATION_JSON).content(requestJson))
+                    .andDo(print())
+                    .andExpect(status().isCreated())
+                    .andExpect(content().contentType(APPLICATION_JSON))
+                    .andExpect(jsonPath("$", hasKey("id")))
+                    .andExpect(jsonPath("$", hasKey("name")))
+                    .andExpect(jsonPath("$.name", Matchers.is(banners.get(0).getName())))
+                    .andExpect(jsonPath("$", hasKey("price")))
+                    .andExpect(jsonPath("$.price", Matchers.is(banners.get(0).getPrice().doubleValue())))
+                    .andExpect(jsonPath("$", hasKey("category")))
+                    .andExpect(jsonPath("$.category", Matchers.is(banners.get(0).getCategory())))
+                    .andExpect(jsonPath("$", hasKey("content")))
+                    .andExpect(jsonPath("$.content", Matchers.is(banners.get(0).getContent())))
+                    .andExpect(jsonPath("$", hasKey("deleted")))
+                    .andExpect(jsonPath("$.deleted", Matchers.is(banners.get(0).getDeleted())))
+            ;
+            throw new TestRollBackException("rollback for accept method");
+        } catch (TestRollBackException e) {
+            log.info(e.getMessage());
+        }
+    }
+
+    @Test
+//    @Transactional(rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
+    public void whenRepeatingKeysThanBannerNotInsertedWith409Status() throws Exception {
+        String requestJson = ow.writeValueAsString(banners.get(0));
+//        try {
+            this.mockMvc.perform(post(bannerUrl)
+                    .contentType(APPLICATION_JSON).content(requestJson))
+                    .andExpect(status().isCreated())
+            ;
+//            this.mockMvc.perform(post(bannerUrl)
+//                    .contentType(APPLICATION_JSON).content(requestJson))
+////                    .andExpect(status().isConflict())
+////                    .andExpect(content().contentType(MediaType.valueOf("text/plain;charset=UTF-8")))
+//            ;
+//            throw new RuntimeException("rollback for accept method");
+//        } catch (RuntimeException e) {
+//            log.info(e.getMessage());
+//        }
     }
 
     @Test
@@ -107,7 +210,7 @@ public class ControllersTests extends ApplicationTest {
 
     @Test
     @Transactional(rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
-    public void whenRepeatingKeysThanNotInsertedWith409Status() throws Exception {
+    public void whenRepeatingKeysThanCategoryNotInsertedWith409Status() throws Exception {
         String requestJson = ow.writeValueAsString(categories.get(0));
         try {
             this.mockMvc.perform(post(catUrl)
