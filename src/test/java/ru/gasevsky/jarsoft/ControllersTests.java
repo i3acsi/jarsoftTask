@@ -144,25 +144,24 @@ public class ControllersTests extends ApplicationTest {
         }
     }
 
-    @Test
-//    @Transactional(rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
-    public void whenRepeatingKeysThanBannerNotInsertedWith409Status() throws Exception {
-        String requestJson = ow.writeValueAsString(banners.get(0));
+//    @Test
+//    public void whenRepeatingKeysThanBannerNotInsertedWith409Status() throws Exception {
+//        String requestJson = ow.writeValueAsString(banners.get(0));
 //        try {
-            this.mockMvc.perform(post(bannerUrl)
-                    .contentType(APPLICATION_JSON).content(requestJson))
-                    .andExpect(status().isCreated())
-            ;
 //            this.mockMvc.perform(post(bannerUrl)
 //                    .contentType(APPLICATION_JSON).content(requestJson))
-////                    .andExpect(status().isConflict())
-////                    .andExpect(content().contentType(MediaType.valueOf("text/plain;charset=UTF-8")))
+//                    .andExpect(status().isCreated())
+//            ;
+//            this.mockMvc.perform(post(bannerUrl)
+//                    .contentType(APPLICATION_JSON).content(requestJson))
+//                    .andExpect(status().isConflict())
+//                    .andExpect(content().contentType(MediaType.valueOf("text/plain;charset=UTF-8")))
 //            ;
 //            throw new RuntimeException("rollback for accept method");
 //        } catch (RuntimeException e) {
 //            log.info(e.getMessage());
 //        }
-    }
+//    }
 
     @Test
     @Transactional(rollbackFor = RuntimeException.class, propagation = Propagation.REQUIRED)
