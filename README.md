@@ -107,6 +107,11 @@
 
 ![alt text](img/createBanner2My.jpg)
 
+Получение и отправка данных (взаимодейтсвие с сервером в целом) основано на REST протоколе взаимодейтвия.
+На стороне клиента это AJAX запросы (JQuery). На стороне сервера - Rest Controller. 
+
+#### Бэк
+
 #### Запуск проекта
 
 Для запуска проекта нужен 
@@ -119,9 +124,28 @@
 mvn clean
 mvn package
 ```
-После BUILD SUCCESS из папки target запускае проект:
+После BUILD SUCCESS из папки target можно запустить проект:
 ```
-java -jar jarsoft-0.1.war
+ java -jar jarsoft-0.1.war
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v2.4.4)
+
+2021-04-05 18:34:14.599  INFO 7948 --- [           main] ru.gasevsky.jarsoft.Application          : Starting Application v0.1 using Java 14.0.1 on oot-gasevsky with PID 7948 
+2021-04-05 18:34:14.605  INFO 7948 --- [           main] ru.gasevsky.jarsoft.Application          : No active profile set, falling back to default profiles: default
+2021-04-05 18:34:24.035  INFO 7948 --- [           main] o.hibernate.annotations.common.Version   : HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+///
+// LOT OF
+// SPRING LOGS
+///
+2021-04-05 18:34:27.152  INFO 7948 --- [           main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
+2021-04-05 18:34:27.638  INFO 7948 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8085 (http) with context path ''
+2021-04-05 18:34:27.658  INFO 7948 --- [           main] ru.gasevsky.jarsoft.Application          : Started Application in 14.186 seconds (JVM running for 15.173)
 ```
 
 Проект запущен. Доступен на localhost:8085
