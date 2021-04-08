@@ -8,7 +8,7 @@ let bannerUrl = origin + '/banner/'
 function loadBannersB() {
     let banners = ''
     for (let banner of frontendDataBanners.values()) {
-        banners += '<button class="btn btn-dark btn-outline-success text text-white m-1"  id="bnr' + banner['id'] + '" value="' + banner['id'] + '" onclick="applyBannerToFormB(this.value)">' + banner['name'] + '</button>'
+        banners += '<button class="btn btn-dark btn-outline-success text text-white m-1"  id="bnr' + banner['id'] + '" value="' + banner['id'] + '" onclick="applyBannerToFormB(this.value)" style="height: auto">' + banner['name'] + '</button>'
     }
     buttonsL.html(banners)
 }

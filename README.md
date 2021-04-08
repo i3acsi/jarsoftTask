@@ -112,6 +112,43 @@
 
 #### Бэк
 
+Так как приложение должно работать по REST протоколу, есть три рест контроллера:
+
+* BannerController: (url pattern : /banner/)
+    * GET ("/"): List\<BannerDto> findAll()
+    * GET ("/search/{name}"): List\<BannerDto> findByName(@PathVariable String name)
+    * POST ("/"): ResponseEntity\<BannerDto> create(@RequestBody BannerDto bannerDto)
+    * PUT ("/"): ResponseEntity\<Void> update(@RequestBody BannerDto bannerDto)
+    * DELETE ("/{id}"): ResponseEntity\<Void> delete(@PathVariable int id)
+    
+* CategoryController: (url pattern : /category/)
+    * GET ("/"): List\<Category> findAll()
+    * GET ("/search/{name}"): List\<Category> findByName(@PathVariable String name)
+    * POST ("/"): ResponseEntity\<Category> create(@RequestBody Category category)
+    * PUT ("/"): ResponseEntity\<Void> update(@RequestBody Category category)
+    * DELETE ("/{id}"): List\<Integer> delete(@PathVariable int id)
+
+* BidController:
+    * GET ("/bid"):
+     ResponseEntity<String> bannerContent(@RequestParam("category") String reqName, HttpServletRequest request)
+     <br>(возвращает текст баннера с соответствующим req_name категории и масимольной ценой, непросмотренного
+      этим пользователем(ip, userAgent) за прошедшие сутки) 
+      
+----
+      
+Для хранения данных использую Postgres. Структура базы данных контролируется Liquibase: в changelog описаны все таблицы
+сущностей с необходимыми ограничениями и связями. В слое работы с БД, классы содержат CRUD методы. Причем Spring
+позволяет писать как HQL запросы (используя @Query или EntityManager), так и с помощью SpringData кастовать большинство
+относительно несложных запросов, используя специальный, интуитивно понятный синтаксис. 
+
+Для хранения данных об уже просмотренных постах, еспользую такую структуру:
+```
+ ConcurrentHashMap<User, ConcurrentLinkedDeque<Pair<Date, Integer>>>
+```
+То есть для связывания ip - userAgent создал сущность User. Будем считать что запросы с одним ip и userAgent приходят от одного пользователя.
+В мапе, User является ключем, а значением является очередь хранящая пару: дата просмотра и id просмотренного баннера.
+В данном случае очередь удобна тем, что хранит данные в порядке поступления.
+
 #### Запуск проекта
 
 Для запуска проекта нужен 

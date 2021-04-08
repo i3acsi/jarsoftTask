@@ -20,7 +20,6 @@ import java.util.stream.StreamSupport;
 public class ApplicationService {
     private final BannerDtoRepo bannerDtoRepo;
     private final CategoryRepo categoryRepo;
-//    private final BannerHbrRepo bannerHbrRepo;
 
     public List<BannerDto> findAllActiveBanners() {
         return bannerDtoRepo.findAllByDeletedFalse();
