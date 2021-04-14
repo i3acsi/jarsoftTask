@@ -1,4 +1,4 @@
-package ru.gasevsky.jarsoft;
+package ru.gasevsky.jarsoft.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
@@ -21,7 +21,7 @@ import java.io.IOException;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("/application-test.properties")
 @Slf4j
-public class CategoryE2ETest {
+public class CategoryControllerTest {
     private String baseUrl = "http://localhost:";
     private String categoryUrl = "/category/";
     private String searchUrl = categoryUrl + "search/";
@@ -35,7 +35,7 @@ public class CategoryE2ETest {
     private TestUtil testUtil;
 
     @Test
-    public void createTest() throws IOException {
+    public void createTest() {
         Category category = testUtil.loadResource("category.create.json", Category.class);
 
         ResponseEntity<Category> re = restTemplate
@@ -46,10 +46,8 @@ public class CategoryE2ETest {
         Category result = re.getBody();
         testUtil.compareCategoriesIgnoreId(category, result);
 
-        Assert.assertThrows(RestClientException.class, () -> {
-            restTemplate
-                    .postForEntity(baseUrl + serverPort + categoryUrl, category, Category.class);
-        });
+        Assert.assertThrows(RestClientException.class, () -> restTemplate
+                .postForEntity(baseUrl + serverPort + categoryUrl, category, Category.class));
     }
 
     @Test
@@ -109,4 +107,3 @@ public class CategoryE2ETest {
         Assert.assertEquals(result, searchForNameAfterUpdate[0]);
     }
 }
-
