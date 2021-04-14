@@ -42,6 +42,26 @@ class TestUtil {
         }
     }
 
+    void categoryArrayComparing(Category[] expected, Category[] result) {
+        Assert.assertNotNull(expected);
+        Assert.assertNotNull(result);
+        Assert.assertTrue(expected.length <= result.length);
+
+        List<Category> expectedList = new ArrayList<>(expected.length);
+        List<Category> resultList = new ArrayList<>(result.length);
+
+        expectedList.addAll(Arrays.asList(expected));
+        resultList.addAll(Arrays.asList(result));
+
+        for (Category categoryRes : resultList){
+            Assert.assertTrue(categoryRes.getId()>0);
+            categoryRes.setId(null);
+            expectedList.remove(categoryRes);
+        }
+
+        Assert.assertEquals(0, expectedList.size());
+    }
+
     void deepCategoryArrayComparing(Category[] expected, Category[] result, boolean ignoreId) {
         Assert.assertNotNull(expected);
         Assert.assertNotNull(result);

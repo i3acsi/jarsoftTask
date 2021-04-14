@@ -65,7 +65,7 @@ public class CategoryE2ETest {
         Assert.assertNotNull(re.getBody());
 
         Category[] categoryResultList = re.getBody();
-        testUtil.deepCategoryArrayComparing(categoryList, categoryResultList, true);
+        testUtil.categoryArrayComparing(categoryList, categoryResultList);
 
         String nameToSearch = categoryList[0].getName().replaceAll("\\d", "");
         re = restTemplate
@@ -105,7 +105,7 @@ public class CategoryE2ETest {
         Assert.assertNotNull(re.getBody());
 
         Category[] searchForNameAfterUpdate = re.getBody();
-        Assert.assertEquals(1, searchForNameBeforeUpdate.length);
+        Assert.assertEquals(1, searchForNameAfterUpdate.length);
         Assert.assertEquals(result, searchForNameAfterUpdate[0]);
     }
 }
