@@ -3,8 +3,11 @@ language: java
 jdk:
  - openjdk14
 
-# используем режим обычного пользователя для сборки проекта.
-sudo: false
+services:
+  - postgresql
+
+before_install:
+  - psql -c 'create database jarsofttest;' -U postgres
 
 # после выполнения сборки запустить скрипт, который будет собирать статистику по JaCoCo
 # Здесь используется сторонни сервис https://codecov.io/
