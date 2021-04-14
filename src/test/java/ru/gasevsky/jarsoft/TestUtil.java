@@ -14,7 +14,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 @Component
 @AllArgsConstructor
@@ -37,6 +40,30 @@ class TestUtil {
             log.error(e.getMessage(), e);
             return null;
         }
+    }
+
+    void deepCategoryArrayComparing(Category[] expected, Category[] result, boolean ignoreId) {
+        Assert.assertNotNull(expected);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(expected.length, result.length);
+
+        List<Category> expectedList = new ArrayList<>(expected.length);
+        List<Category> resultList = new ArrayList<>(result.length);
+
+        expectedList.addAll(Arrays.asList(expected));
+        resultList.addAll(Arrays.asList(result));
+
+        int c = 0;
+        while (!resultList.isEmpty()) {
+            Category cRes = resultList.remove(0);
+            if (ignoreId) {
+                Assert.assertTrue(cRes.getId() > 0);
+                cRes.setId(null);
+            }
+            Assert.assertTrue(expectedList.remove(cRes));
+            c++;
+        }
+        Assert.assertEquals(c, expected.length);
     }
 
     void compareCategoriesIgnoreId(Category expected, Category actual) {

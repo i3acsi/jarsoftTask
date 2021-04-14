@@ -16,8 +16,6 @@ import org.springframework.web.client.RestClientException;
 import ru.gasevsky.jarsoft.model.Category;
 
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -55,20 +53,27 @@ public class CategoryE2ETest {
 
     @Test
     public void getTest() {
-        Category category = testUtil.loadResource("category.getAll.json", Category.class);
-        restTemplate.postForEntity(baseUrl + serverPort + categoryUrl, category, Category.class);
+        Category[] categoryList = testUtil.loadResource("category.getAll.json", Category[].class);
+        for (Category category : categoryList) {
+            restTemplate.postForEntity(baseUrl + serverPort + categoryUrl, category, Category.class);
+        }
 
-
-        ResponseEntity<List> re = restTemplate
-                .getForEntity(baseUrl + serverPort + categoryUrl, List.class);
+        ResponseEntity<Category[]> re = restTemplate
+                .getForEntity(baseUrl + serverPort + categoryUrl, Category[].class);
         Assert.assertEquals(HttpStatus.OK, re.getStatusCode());
         Assert.assertNotNull(re.getBody());
 
-        List list = re.getBody();
-        Assert.assertTrue(list.size() > 0);
-        Category result = testUtil.loadPojoFromMap((LinkedHashMap<String, Object>) list.get(0), Category.class);
+        Category[] categoryResultList = re.getBody();
+        testUtil.deepCategoryArrayComparing(categoryList, categoryResultList, true);
 
-        testUtil.compareCategoriesIgnoreId(category, result);
+        String toSearch = "search/" + categoryList[0].getName().replaceAll("\\d", "");
+        re = restTemplate
+                .getForEntity(baseUrl + serverPort + categoryUrl + toSearch, Category[].class);
+        Assert.assertEquals(HttpStatus.OK, re.getStatusCode());
+        Assert.assertNotNull(re.getBody());
+
+        categoryResultList = re.getBody();
+        testUtil.deepCategoryArrayComparing(categoryList, categoryResultList, true);
     }
 
 }
