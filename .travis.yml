@@ -1,13 +1,18 @@
 # используем язык java. Travis CI поддерживает другие языки тоже.
 language: java
 jdk:
- - openjdk14
+  - openjdk14
+dist:
+  xenial
+sudo:
+  required
 
 services:
   - postgresql
 
 before_install:
   - psql -c 'create database jarsofttest;' -U postgres
+  - psql -c 'create database jarsoft;' -U postgres
 
 # после выполнения сборки запустить скрипт, который будет собирать статистику по JaCoCo
 # Здесь используется сторонни сервис https://codecov.io/
@@ -18,9 +23,9 @@ after_success:
 notifications:
   email:
     recipients:
-    - gasevskyv@gmail.com
+      - gasevskyv@gmail.com
     on_success: never # default: change
     on_failure: always # default: always
 env:
   global:
-  - CODECOV_TOKEN="ec443ad2-620f-42fa-81ff-18791b3c6898"
+    - CODECOV_TOKEN="ec443ad2-620f-42fa-81ff-18791b3c6898"

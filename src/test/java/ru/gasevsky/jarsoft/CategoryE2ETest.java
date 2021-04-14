@@ -24,6 +24,7 @@ import java.io.IOException;
 public class CategoryE2ETest {
     private String baseUrl = "http://localhost:";
     private String categoryUrl = "/category/";
+    private String searchUrl = categoryUrl + "search/";
     @LocalServerPort
     private int serverPort;
 
@@ -66,9 +67,9 @@ public class CategoryE2ETest {
         Category[] categoryResultList = re.getBody();
         testUtil.deepCategoryArrayComparing(categoryList, categoryResultList, true);
 
-        String toSearch = "search/" + categoryList[0].getName().replaceAll("\\d", "");
+        String nameToSearch = categoryList[0].getName().replaceAll("\\d", "");
         re = restTemplate
-                .getForEntity(baseUrl + serverPort + categoryUrl + toSearch, Category[].class);
+                .getForEntity(baseUrl + serverPort + searchUrl + nameToSearch, Category[].class);
         Assert.assertEquals(HttpStatus.OK, re.getStatusCode());
         Assert.assertNotNull(re.getBody());
 
@@ -76,5 +77,36 @@ public class CategoryE2ETest {
         testUtil.deepCategoryArrayComparing(categoryList, categoryResultList, true);
     }
 
+    @Test
+    public void updateTest() {
+        String newName = "updated";
+        String newReqName = "updatedReq";
+        Category category = testUtil.loadResource("category.update.json", Category.class);
+        Category result = restTemplate.postForObject(baseUrl + serverPort + categoryUrl, category, Category.class);
+        String nameBefore = result.getName();
+        String reqBefore = result.getReqName();
+        testUtil.compareCategoriesIgnoreId(category, result);
+
+        result.setName(newName);
+        result.setReqName(newReqName);
+        restTemplate.put(baseUrl + serverPort + categoryUrl, result);
+
+        ResponseEntity<Category[]> re = restTemplate
+                .getForEntity(baseUrl + serverPort + searchUrl + nameBefore, Category[].class);
+        Assert.assertEquals(HttpStatus.OK, re.getStatusCode());
+        Assert.assertNotNull(re.getBody());
+
+        Category[] searchForNameBeforeUpdate = re.getBody();
+        Assert.assertEquals(0, searchForNameBeforeUpdate.length);
+
+        re = restTemplate
+                .getForEntity(baseUrl + serverPort + searchUrl + newName, Category[].class);
+        Assert.assertEquals(HttpStatus.OK, re.getStatusCode());
+        Assert.assertNotNull(re.getBody());
+
+        Category[] searchForNameAfterUpdate = re.getBody();
+        Assert.assertEquals(1, searchForNameBeforeUpdate.length);
+        Assert.assertEquals(result, searchForNameAfterUpdate[0]);
+    }
 }
 
