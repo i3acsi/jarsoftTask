@@ -1,3 +1,9 @@
+[GIT REPOSITORY](https://github.com/i3acsi/jarsoftTask)
+
+
+[![Build Status](https://www.travis-ci.com/i3acsi/jarsoftTask.svg?branch=main)](https://www.travis-ci.com/i3acsi/jarsoftTask)
+[![codecov](https://codecov.io/gh/i3acsi/jarsoftTask/branch/main/graph/badge.svg?token=MNR9EONRJ0)](https://codecov.io/gh/i3acsi/jarsoftTask)
+
 ### ТЕСТОВОЕ ЗАДАНИЕ JAVA DEVELOPER
 
 #### Общее описание
