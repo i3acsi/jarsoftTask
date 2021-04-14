@@ -1,4 +1,4 @@
-package ru.gasevsky.jarsoft;
+package ru.gasevsky.jarsoft.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
